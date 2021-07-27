@@ -1,6 +1,7 @@
 package com.severinu.docurestapi.document;
 
 import java.util.List;
+import java.util.Optional;
 
 public class Document {
 
@@ -38,4 +39,6 @@ public class Document {
     public void setTags(List<String> tags) {
         this.tags = tags;
     }
+
+
 }

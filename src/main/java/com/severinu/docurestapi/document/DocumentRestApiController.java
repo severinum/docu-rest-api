@@ -19,16 +19,12 @@ public class DocumentRestApiController {
 
     @GetMapping("/{documentNumber}")
     public Optional<Document> getDocument(@PathVariable long documentNumber) {
-        return documents.stream()
-                .filter(doc -> doc.getNumber() == documentNumber)
-                .findAny();
+        return findDocumentByNumber(documentNumber);
     }
 
     @GetMapping("/{documentNumber}/title")
     public Optional<String> getDocumentTitle(@PathVariable long documentNumber) {
-        return documents.stream()
-                .filter( document -> document.getNumber() == documentNumber)
-                .findAny()
+        return findDocumentByNumber(documentNumber)
                 .map(Document::getTitle);
     }
 
@@ -38,9 +34,39 @@ public class DocumentRestApiController {
     }
 
     @PostMapping(value = "/{documentNumber}/tags", consumes = MediaType.TEXT_PLAIN_VALUE)
-    public void addTag(@PathVariable long documentNumber, @RequestBody String tag) {
-        documents.stream().filter( document -> document.getNumber() == documentNumber)
-                .findAny().ifPresent( doc -> doc.getTags().add(tag));
+    public void addTag(@PathVariable long documentNumber,
+                       @RequestBody String tag) {
+        findDocumentByNumber(documentNumber)
+                .ifPresent( doc -> doc.getTags().add(tag));
+    }
+
+
+    @PutMapping("/{documentNumber}")
+    public void replaceDocument(@PathVariable long documentNumber,
+                                @RequestBody Document newDocument) {
+        findDocumentByNumber(documentNumber)
+                .ifPresent(document ->  {
+                    document.setTitle(newDocument.getTitle());
+                    document.setTags(newDocument.getTags());
+                });
+    }
+
+    @PatchMapping("/{documentNumber}")
+    public void updateDocument(@PathVariable long documentNumber,
+                               @RequestBody Document newPartialDocument) {
+        findDocumentByNumber(documentNumber)
+                .ifPresent(document -> {
+                    if(newPartialDocument.getTitle() != null)
+                        document.setTitle(newPartialDocument.getTitle());
+                    if(newPartialDocument.getTags() != null)
+                        document.setTags(newPartialDocument.getTags());
+                });
+    }
+
+    private Optional<Document> findDocumentByNumber(long documentNumber) {
+        return documents.stream()
+                .filter(document -> document.getNumber() == documentNumber)
+                .findAny();
     }
 
 }
